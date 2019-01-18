@@ -1,7 +1,6 @@
 package Day01;
 use strict;
 use warnings;
-use File::Slurp;
 
 sub part1 {
     my ($input) = @_;
