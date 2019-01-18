@@ -1,1 +1,1 @@
-require File::Slurp;
+requires 'File::Slurp';
