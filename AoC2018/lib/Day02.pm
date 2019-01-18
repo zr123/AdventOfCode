@@ -44,4 +44,12 @@ sub part1 {
 	return $twices * $thrices;
 }
 
+sub difference {
+	return 0;
+}
+
+sub part2 {
+	return "weasel";
+}
+
 1;

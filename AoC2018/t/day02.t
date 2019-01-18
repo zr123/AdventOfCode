@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 16;
+use Test::More tests => 22;
 use Day02;
 use File::Slurp;
 
@@ -24,3 +24,13 @@ is( Day02::thrice($examples[6]),    1 );
 is( Day02::part1(@examples),       12 );
 
 is( Day02::part1(@input),        4940 );
+
+my @boxIds =("fghij", "klmno", "pqrst", "fguij", "axcye", "wvxyz");
+
+is( Day02::difference($boxIds[0], $boxIds[5]),      2 );
+is( Day02::difference($boxIds[5], $boxIds[0]),      2 );
+is( Day02::difference($boxIds[1], $boxIds[4]),      1 );
+is( Day02::difference($boxIds[4], $boxIds[1]),      1 );
+is( Day02::part2(@boxIds),                      "fgij");
+
+is( Day02::part2(@input),                           "");
