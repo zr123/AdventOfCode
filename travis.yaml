@@ -1,1 +1,4 @@
 language: perl
+
+script:
+    - prove -l AoC2018
