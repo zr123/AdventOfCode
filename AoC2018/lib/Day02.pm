@@ -75,12 +75,11 @@ sub commonLetters {
 
 sub part2 {
 	my @boxIDs = @_;
-    chomp for (@boxIDs);
+    map(chomp, @boxIDs);
     for(my $i = 0; $i < scalar(@boxIDs); ++$i){
         for(my $c = $i+1; $c < scalar(@boxIDs); ++$c){
             if(difference($boxIDs[$i], $boxIDs[$c]) == 1){
                 return commonLetters($boxIDs[$i], $boxIDs[$c]);
-                #print STDERR "$boxIDs[$i], $boxIDs[$c]\n";
             }
         }
     }
