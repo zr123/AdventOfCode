@@ -4,7 +4,4 @@ script:
     - perl Makefile.PL
     - make
     - make test
-    - cover -t
-    
-after_success:
-    - coverage-report
+    - cover -test -report coveralls
