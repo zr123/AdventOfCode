@@ -3,3 +3,5 @@ language: perl
 script:
     - prove -l -r
     
+after_success:
+    - coverage-report
