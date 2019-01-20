@@ -1,7 +1,10 @@
 language: perl
 
 script:
-    - prove -l -r
+    - perl Makefile.PL
+    - make
+    - make test
+    - cover -t
     
 after_success:
     - coverage-report
