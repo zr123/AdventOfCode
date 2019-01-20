@@ -83,7 +83,6 @@ sub part2 {
             }
         }
     }
-    return "failure";
 }
 
 1;
