@@ -1,5 +1,5 @@
 language: perl
 
 script:
-    - cd AoC2018
-    - prove -l 
+    - prove -l -r
+    

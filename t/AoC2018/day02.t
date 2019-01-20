@@ -1,11 +1,11 @@
 use strict;
 use warnings;
 use Test::More tests => 23;
-use Day02;
+use AoC2018::Day02;
 use File::Slurp;
 
 my @examples = ("abcdef", "bababc", "abbcde", "abcccd", "aabcdd", "abcdee", "ababab");
-my @input = read_file("input/day02.txt");
+my @input = read_file("input/AoC2018/day02.txt");
 
 is( Day02::twice($examples[0]),     0 );
 is( Day02::thrice($examples[0]),    0 );
