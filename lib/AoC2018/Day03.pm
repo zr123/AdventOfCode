@@ -1,7 +1,6 @@
 package Day03;
 use strict;
 use warnings;
-use Data::Dumper qw(Dumper);
 
 sub claim {
     my ($claim, @fabric) = @_;
