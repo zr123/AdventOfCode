@@ -10,7 +10,6 @@ sub getFuel {
 sub part1 {
     my @modules = @_;
 	my $sum = 0;
-	print @modules;
 	for(@modules) {
 		$sum += getFuel($_);
 	}
@@ -32,7 +31,6 @@ sub getActualFuel {
 sub part2 {
     my @modules = @_;
 	my $sum = 0;
-	print @modules;
 	for(@modules) {
 		$sum += getActualFuel($_);
 	}
