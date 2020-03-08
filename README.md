@@ -16,3 +16,11 @@ See .travis.yml for the build-script.
 * The input/AoC20XX folders contian the input-files, if any.
 * The lib/AoC20XX folders contain the perl-modules containing the actual code.
 * The t/AoC20XX folders contain the test-files.
+
+## Progress
+
+2015 [=================================================>] 50 / 50
+2016 [============================================>#####] 45 / 50
+2017 [=============================>####################] 30 / 50
+2018 [====>#############################################] 05 / 50
+2019 [===>##############################################] 04 / 50
