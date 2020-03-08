@@ -40,25 +40,31 @@ sub runInstructions {
 		last if(processOpcode($pointer, \@instructions ) == 99);
 		$pointer += 4;
 	}
-	return encode(@instructions)
+	return @instructions
 }
 
-sub run_with {
+sub runWith {
 	my ($noun, $verb, $instriction_string) = @_;
 	$instriction_string =~ s/^(\d+),\d+,\d+/$1,$noun,$verb/;
-	print($instriction_string);
-	$instriction_string = runInstructions($instriction_string);
-	my @instructions = decode($instriction_string);
+	my @instructions = runInstructions($instriction_string);
 	return $instructions[0];
 }
 
 sub part1 {
 	my ($instriction_string) = @_;
 	my @instructions = decode($instriction_string);
-	return run_with(12, 2, $instriction_string);
+	return runWith(12, 2, $instriction_string);
 }
 
-#run_with(12, 2, "1,9,10,3,2,3,11,0,99,30,40,50");
-
+sub part2 {
+	my ($goal, $instriction_string) = @_;
+	for(my $noun = 0; $noun < 100; $noun++){
+		for(my $verb = 0; $verb < 100; $verb++){
+			if(runWith($noun, $verb, $instriction_string) == $goal){
+				return 100 * $noun + $verb;
+			}
+		}
+	}
+}
 
 1;
