@@ -22,7 +22,6 @@ sub part1 {
     for my $claim (@claims){
         @fabric = claim($claim, @fabric);
     }
-    print Dumper \@fabric;
     my $count = 0;
     for my $row (@fabric){
         for my $tile (@{$row}){
