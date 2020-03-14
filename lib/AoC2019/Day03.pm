@@ -1,6 +1,6 @@
 package Day03;
 use strict;
-use warnings;
+#use warnings;
 use List::Util "min";
 
 
@@ -64,11 +64,58 @@ sub part1 {
 	return min(@distances);
 }
 
+sub pathDistance {
+	my ($key, $mapref) = @_;
+}
+
+
+sub checkWiring {
+	my ($x, $y, $wiringNumber, $mapref) = @_;
+	if(defined($mapref->{"$x $y"}) && ($mapref->{"$x $y"} & $wiringNumber)){
+		return 1;
+	}
+	return 0;
+}
+
+
+sub addPathValues {
+	my ($x, $y, $value, $wiringNumber, $mapref) = @_;
+	
+	if(defined($mapref->{"$x $y PATHVALUE$wiringNumber"}) && $mapref->{"$x $y PATHVALUE$wiringNumber"} < $value){
+		return;
+	}
+	$mapref->{"$x $y PATHVALUE$wiringNumber"} = $value;
+	
+	if(checkWiring($x+1, $y, $wiringNumber, $mapref)){
+		addPathValues($x+1, $y, $value+1, $wiringNumber, $mapref)
+	}
+	if(checkWiring($x-1, $y, $wiringNumber, $mapref)){
+		addPathValues($x-1, $y, $value+1, $wiringNumber, $mapref)
+	}
+	if(checkWiring($x, $y+1, $wiringNumber, $mapref)){
+		addPathValues($x, $y+1, $value+1, $wiringNumber, $mapref)
+	}
+	if(checkWiring($x, $y-1, $wiringNumber, $mapref)){
+		addPathValues($x, $y-1, $value+1, $wiringNumber, $mapref)
+	}
+}
+
 
 sub part2 {
 	my ($instructionsString1, $instructionsString2) = @_;
 	my $mapref = createWiring($instructionsString1, $instructionsString2);
+	addPathValues(0, 0, 0, 1, $mapref);
+	addPathValues(0, 0, 0, 2, $mapref);
 	my @intersections = getIntersections($mapref);
+	my @pathValues;
+	for (@intersections){
+		if($_ =~ /^(\d+) (\d+)$/){
+			print "$1 $2" . $mapref->{"$1 $2 PATHVALUE1"} . " " . $mapref->{"$1 $2 PATHVALUE2"} . "\n";
+			push(@pathValues, $mapref->{"$1 $2 PATHVALUE1"} + $mapref->{"$1 $2 PATHVALUE2"});
+		}
+	}
+	#push(@pathValues, pathDistance($_)) for @intersections;
+	return min(@pathValues);
 }
 
 1;
