@@ -1,5 +1,5 @@
 use strict;
-# use warnings;
+use warnings;
 use Test::More tests => 14;
 use AoC2019::Day03;
 use File::Slurp;
@@ -18,11 +18,11 @@ is( Day03::part1("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51", "U98,R91,D20,R16
 
 is( Day03::part1(@input), 1195);
 
-Day03::addPathValues(0, 0, 0, 1, $mapref);
+Day03::addPathValues(1, $mapref);
 is( $mapref->{"3 3 PATHVALUE1"}, 20);
 is( $mapref->{"6 5 PATHVALUE1"}, 15);
 
-Day03::addPathValues(0, 0, 0, 2, $mapref);
+Day03::addPathValues(2, $mapref);
 is( $mapref->{"3 3 PATHVALUE2"}, 20);
 is( $mapref->{"6 5 PATHVALUE2"}, 15);
 

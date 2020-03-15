@@ -1,6 +1,6 @@
 package Day03;
 use strict;
-#use warnings;
+use warnings;
 use List::Util "min";
 
 
@@ -64,57 +64,69 @@ sub part1 {
 	return min(@distances);
 }
 
-sub pathDistance {
-	my ($key, $mapref) = @_;
-}
-
-
 sub checkWiring {
-	my ($x, $y, $wiringNumber, $mapref) = @_;
-	if(defined($mapref->{"$x $y"}) && ($mapref->{"$x $y"} & $wiringNumber)){
-		return 1;
-	}
-	return 0;
+	my ($path, $value, $wiringNumber, $mapref) = @_;
+	return 0 if(!defined($mapref->{$path}));	 			# no wiring
+	return 0 unless($mapref->{$path} & $wiringNumber);	# wrong wiring
+	return 0 if (defined($mapref->{"$path PATHVALUE$wiringNumber"}) && ($mapref->{"$path PATHVALUE$wiringNumber"} <= $value));	# better path exists
+	return 1;
 }
 
+sub setAdjacentFieldPathValue {
+	my ($path, $wiringNumber, $mapref) = @_;
+	$path =~ /^(-?\d+) (-?\d+)$/;
+	my ($x, $y) = ($1, $2);
+	my @nextPaths;
+	
+	my ($p, $v) = (($x+1) . " $y", $mapref->{"$path PATHVALUE$wiringNumber"} +1);
+	if(checkWiring($p, $v, $wiringNumber, $mapref)){
+		$mapref->{"$p PATHVALUE$wiringNumber"} = $v;
+		push(@nextPaths, $p);
+	}
+	
+	($p, $v) = (($x-1) . " $y", $mapref->{"$path PATHVALUE$wiringNumber"} +1);
+	if(checkWiring($p, $v, $wiringNumber, $mapref)){
+		$mapref->{"$p PATHVALUE$wiringNumber"} = $v;
+		push(@nextPaths, $p);
+	}
+	
+	($p, $v) = ("$x " . ($y+1), $mapref->{"$path PATHVALUE$wiringNumber"} +1);
+	if(checkWiring($p, $v, $wiringNumber, $mapref)){
+		$mapref->{"$p PATHVALUE$wiringNumber"} = $v;
+		push(@nextPaths, $p);
+	}
+	
+	($p, $v) = ("$x " . ($y-1), $mapref->{"$path PATHVALUE$wiringNumber"} +1);
+	if(checkWiring($p, $v, $wiringNumber, $mapref)){
+		$mapref->{"$p PATHVALUE$wiringNumber"} = $v;
+		push(@nextPaths, $p);
+	}
+
+	return @nextPaths;
+}
 
 sub addPathValues {
-	my ($x, $y, $value, $wiringNumber, $mapref) = @_;
+	my ($wiringNumber, $mapref) = @_;
 	
-	if(defined($mapref->{"$x $y PATHVALUE$wiringNumber"}) && $mapref->{"$x $y PATHVALUE$wiringNumber"} < $value){
-		return;
-	}
-	$mapref->{"$x $y PATHVALUE$wiringNumber"} = $value;
-	
-	if(checkWiring($x+1, $y, $wiringNumber, $mapref)){
-		addPathValues($x+1, $y, $value+1, $wiringNumber, $mapref)
-	}
-	if(checkWiring($x-1, $y, $wiringNumber, $mapref)){
-		addPathValues($x-1, $y, $value+1, $wiringNumber, $mapref)
-	}
-	if(checkWiring($x, $y+1, $wiringNumber, $mapref)){
-		addPathValues($x, $y+1, $value+1, $wiringNumber, $mapref)
-	}
-	if(checkWiring($x, $y-1, $wiringNumber, $mapref)){
-		addPathValues($x, $y-1, $value+1, $wiringNumber, $mapref)
+	$mapref->{"0 0 PATHVALUE$wiringNumber"} = 0;
+	my @paths = setAdjacentFieldPathValue("0 0", $wiringNumber, $mapref);
+	while(my $path = pop(@paths)){
+		push(@paths, setAdjacentFieldPathValue($path, $wiringNumber, $mapref));
 	}
 }
-
 
 sub part2 {
 	my ($instructionsString1, $instructionsString2) = @_;
 	my $mapref = createWiring($instructionsString1, $instructionsString2);
-	addPathValues(0, 0, 0, 1, $mapref);
-	addPathValues(0, 0, 0, 2, $mapref);
+	addPathValues(1, $mapref);
+	addPathValues(2, $mapref);
 	my @intersections = getIntersections($mapref);
 	my @pathValues;
 	for (@intersections){
 		if($_ =~ /^(\d+) (\d+)$/){
-			print "$1 $2" . $mapref->{"$1 $2 PATHVALUE1"} . " " . $mapref->{"$1 $2 PATHVALUE2"} . "\n";
 			push(@pathValues, $mapref->{"$1 $2 PATHVALUE1"} + $mapref->{"$1 $2 PATHVALUE2"});
 		}
 	}
-	#push(@pathValues, pathDistance($_)) for @intersections;
 	return min(@pathValues);
 }
 
