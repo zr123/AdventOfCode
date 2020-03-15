@@ -66,7 +66,7 @@ sub part1 {
 
 sub checkWiring {
 	my ($path, $value, $wiringNumber, $mapref) = @_;
-	return 0 if(!defined($mapref->{$path}));	 			# no wiring
+	return 0 if(!defined($mapref->{$path}));	 		# no wiring
 	return 0 unless($mapref->{$path} & $wiringNumber);	# wrong wiring
 	return 0 if (defined($mapref->{"$path PATHVALUE$wiringNumber"}) && ($mapref->{"$path PATHVALUE$wiringNumber"} <= $value));	# better path exists
 	return 1;
@@ -110,7 +110,7 @@ sub addPathValues {
 	
 	$mapref->{"0 0 PATHVALUE$wiringNumber"} = 0;
 	my @paths = setAdjacentFieldPathValue("0 0", $wiringNumber, $mapref);
-	while(my $path = pop(@paths)){
+	while(my $path = shift(@paths)){
 		push(@paths, setAdjacentFieldPathValue($path, $wiringNumber, $mapref));
 	}
 }
@@ -123,7 +123,7 @@ sub part2 {
 	my @intersections = getIntersections($mapref);
 	my @pathValues;
 	for (@intersections){
-		if($_ =~ /^(\d+) (\d+)$/){
+		if($_ =~ /^(-?\d+) (-?\d+)$/){
 			push(@pathValues, $mapref->{"$1 $2 PATHVALUE1"} + $mapref->{"$1 $2 PATHVALUE2"});
 		}
 	}
