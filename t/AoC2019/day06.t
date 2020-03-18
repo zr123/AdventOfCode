@@ -9,7 +9,7 @@ my @input = read_file("input/AoC2019/day06.txt");
 my @test_input = ("COM)B", "B)C", "C)D", "D)E", "E)F", "B)G", "G)H", "D)I", "E)J", "J)K", "K)L");
 
 my %orbits = Day06::getHashedOrbitMap(@test_input);
-is( scalar(%orbits), 8);
+is( keys(%orbits), 8);
 
 my %orbitCounts = Day06::getOrbitCounts(%orbits);
 is( $orbitCounts{"D"}, 3);
