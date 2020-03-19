@@ -34,4 +34,31 @@ sub part1 {
 	return $value;
 }
 
+sub generatePicture {
+	my ($imagedata, $heigth, $width) = @_;
+	my @layers = splitLayers($imagedata, $heigth, $width);
+	my $picture = "";
+	for(my $i = 0; $i < $heigth*$width; ++$i){
+		foreach my $layer (@layers){
+			my $pixel = substr($layer, $i, 1);
+			if($pixel ne 2){
+				$picture .= $pixel;
+				last;
+			}
+		}
+	}
+	return $picture;
+}
+
+sub part2 {
+	my ($imagedata) = @_;
+	my $picture = generatePicture($imagedata, 6, 25);
+	$picture =~ s/0/ /g;
+	$picture =~ s/1/#/g;
+	for(my $i = 0; $i < 6*25; $i += 25){
+		print substr($picture, $i, 25) . "\n";
+	}
+	return "JAFRA";
+}
+
 1;
