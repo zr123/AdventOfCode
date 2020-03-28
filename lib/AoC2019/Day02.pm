@@ -33,34 +33,34 @@ sub processOpcode {
 }
 
 sub runInstructions {
-    my ($instriction_string) = @_;
-	my @instructions = decode($instriction_string);
+    my ($instruction_string) = @_;
+	my @instructions = decode($instruction_string);
 	my $pointer = 0;
 	while(1){
 		last if(processOpcode($pointer, \@instructions ) == 99);
 		$pointer += 4;
 	}
-	return @instructions
+	return @instructions;
 }
 
 sub runWith {
-	my ($noun, $verb, $instriction_string) = @_;
-	$instriction_string =~ s/^(\d+),\d+,\d+/$1,$noun,$verb/;
-	my @instructions = runInstructions($instriction_string);
+	my ($noun, $verb, $instruction_string) = @_;
+	$instruction_string =~ s/^(\d+),\d+,\d+/$1,$noun,$verb/;
+	my @instructions = runInstructions($instruction_string);
 	return $instructions[0];
 }
 
 sub part1 {
-	my ($instriction_string) = @_;
-	my @instructions = decode($instriction_string);
-	return runWith(12, 2, $instriction_string);
+	my ($instruction_string) = @_;
+	my @instructions = decode($instruction_string);
+	return runWith(12, 2, $instruction_string);
 }
 
 sub part2 {
-	my ($goal, $instriction_string) = @_;
+	my ($goal, $instruction_string) = @_;
 	for(my $noun = 0; $noun < 100; $noun++){
 		for(my $verb = 0; $verb < 100; $verb++){
-			if(runWith($noun, $verb, $instriction_string) == $goal){
+			if(runWith($noun, $verb, $instruction_string) == $goal){
 				return 100 * $noun + $verb;
 			}
 		}
