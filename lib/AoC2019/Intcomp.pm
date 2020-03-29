@@ -8,28 +8,64 @@ sub decode {
 	return \@numbers;
 }
 
+sub getParam{
+	my ($state, $position, $mode) = @_;
+	my $valueAtPos = $state->{instructions}[$position];
+	if($mode == 0){ # Parameter mode
+		return $state->{instructions}[$valueAtPos]
+	}
+	if($mode == 1){ # Immediate mode
+		return $valueAtPos;
+	}
+	die("Unexpected Mode $mode: Position $position \n" + %{$state});
+}
+
+sub writePos {
+	my ($state, $position, $value) = @_;
+	my $loc = $state->{instructions}[$position];
+	$state->{instructions}[$loc] = $value;
+}
+
 sub op1_addition {
-	my ($state) = @_;
-	my ($arg1, $arg2, $arg3) = @{$state->{instructions}}[$state->{pos}+1 .. $state->{pos}+3];
-	$state->{instructions}[$arg3] = $state->{instructions}[$arg1] + $state->{instructions}[$arg2];
+	my ($state, $mode1, $mode2) = @_;
+	my $pos = $state->{pos};
+	my $value = getParam($state, $pos+1, 0) + getParam($state, $pos+2, 0);
+	writePos($state, $pos+3, $value);
 	$state->{pos} += 4;
 	return 1;
 }
 
 sub op2_multiplication {
 	my ($state) = @_;
-	my ($arg1, $arg2, $arg3) = @{$state->{instructions}}[$state->{pos}+1 .. $state->{pos}+3];
-	$state->{instructions}[$arg3] = $state->{instructions}[$arg1] * $state->{instructions}[$arg2];
+	my $pos = $state->{pos};
+	my $value = getParam($state, $pos+1, 0) * getParam($state, $pos+2, 0);
+	writePos($state, $pos+3, $value);
 	$state->{pos} += 4;
 	return 2;
 }
 
-sub processOpcode {
+sub op3_weasel {
+
+}
+
+sub op4_weasel {
+
+}
+
+sub weasel {
 	my ($state) = @_;
 	my $currentOpcode = $state->{instructions}[$state->{pos}];
-	return 99 							if($currentOpcode == 99);
-	return op1_addition($state) 		if($currentOpcode ==  1);
-	return op2_multiplication($state) 	if($currentOpcode ==  2);
+	$currentOpcode += 100000;
+	$currentOpcode =~ /^1(\d)(\d)(\d)(\d\d)$/;
+	return ($4, $3, $2, $1);
+}
+
+sub processOpcode {
+	my ($state) = @_;
+ 	my ($opcode, @modes) = weasel($state);
+	return 99 									if($opcode == 99);
+	return op1_addition($state, @modes) 		if($opcode ==  1);
+	return op2_multiplication($state, @modes)	if($opcode ==  2);
 	die("Unexpected Opcode");
 }
 
