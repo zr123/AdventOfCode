@@ -9,7 +9,8 @@ sub decode {
 }
 
 sub getParam{
-	my ($state, $position, $mode) = @_;
+	my ($state, $pos_offset, $mode) = @_;
+	my $position = $state->{pos} + $pos_offset;
 	my $valueAtPos = $state->{instructions}[$position];
 	if($mode == 0){ # Parameter mode
 		return $state->{instructions}[$valueAtPos]
@@ -21,50 +22,46 @@ sub getParam{
 }
 
 sub writePos {
-	my ($state, $position, $value) = @_;
+	my ($state, $pos_offset, $value) = @_;
+	my $position = $state->{pos} + $pos_offset;
 	my $loc = $state->{instructions}[$position];
 	$state->{instructions}[$loc] = $value;
 }
 
 sub op01 { # addition
 	my ($state, $mode1, $mode2) = @_;
-	my $pos = $state->{pos};
-	my $value = getParam($state, $pos+1, $mode1) + getParam($state, $pos+2, $mode2);
-	writePos($state, $pos+3, $value);
+	my $value = getParam($state, +1, $mode1) + getParam($state, +2, $mode2);
+	writePos($state, +3, $value);
 	$state->{pos} += 4;
 	return 1;
 }
 
 sub op02 { # multiplication
 	my ($state, $mode1, $mode2) = @_;
-	my $pos = $state->{pos};
-	my $value = getParam($state, $pos+1, $mode1) * getParam($state, $pos+2, $mode2);
-	writePos($state, $pos+3, $value);
+	my $value = getParam($state, +1, $mode1) * getParam($state, +2, $mode2);
+	writePos($state, +3, $value);
 	$state->{pos} += 4;
 	return 2;
 }
 
 sub op03 { # input
 	my ($state) = @_;
-	my $pos = $state->{pos};
-	writePos($state, $pos+1, $state->{input});
+	writePos($state, +1, $state->{input});
 	$state->{pos} += 2;
 	return 2;
 }
 
 sub op04 { # output
 	my ($state, $mode1) = @_;
-	my $pos = $state->{pos};
-	$state->{output} = getParam($state, $pos+1, $mode1);
+	$state->{output} = getParam($state, +1, $mode1);
 	$state->{pos} += 2;
 	return 2;
 }
 
 sub op05 { # jump-if-true
 	my ($state, $mode1, $mode2) = @_;
-	my $pos = $state->{pos};
-	if(getParam($state, $pos+1, $mode1) != 0){
-		$state->{pos} = getParam($state, $pos+2, $mode2);
+	if(getParam($state, +1, $mode1) != 0){
+		$state->{pos} = getParam($state, +2, $mode2);
 	}else{
 		$state->{pos} += 3;
 	}
@@ -72,9 +69,8 @@ sub op05 { # jump-if-true
 
 sub op06 { # jump-if-false
 	my ($state, $mode1, $mode2) = @_;
-	my $pos = $state->{pos};
-	if(getParam($state, $pos+1, $mode1) == 0){
-		$state->{pos} = getParam($state, $pos+2, $mode2);
+	if(getParam($state, +1, $mode1) == 0){
+		$state->{pos} = getParam($state, +2, $mode2);
 	}else{
 		$state->{pos} += 3;
 	}
@@ -82,22 +78,20 @@ sub op06 { # jump-if-false
 
 sub op07 { # less than
 	my ($state, $mode1, $mode2) = @_;
-	my $pos = $state->{pos};
-	if(getParam($state, $pos+1, $mode1) < getParam($state, $pos+2, $mode2)){
-		writePos($state, $pos+3, 1);
+	if(getParam($state, +1, $mode1) < getParam($state, +2, $mode2)){
+		writePos($state, +3, 1);
 	}else{
-		writePos($state, $pos+3, 0);
+		writePos($state, +3, 0);
 	}
 	$state->{pos} += 4;
 }
 
 sub op08 { # equals
 	my ($state, $mode1, $mode2) = @_;
-	my $pos = $state->{pos};
-	if(getParam($state, $pos+1, $mode1) == getParam($state, $pos+2, $mode2)){
-		writePos($state, $pos+3, 1);
+	if(getParam($state, +1, $mode1) == getParam($state, +2, $mode2)){
+		writePos($state, +3, 1);
 	}else{
-		writePos($state, $pos+3, 0);
+		writePos($state, +3, 0);
 	}
 	$state->{pos} += 4;
 }
