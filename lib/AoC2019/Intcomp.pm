@@ -29,27 +29,35 @@ sub writePos {
 sub op1_addition {
 	my ($state, $mode1, $mode2) = @_;
 	my $pos = $state->{pos};
-	my $value = getParam($state, $pos+1, 0) + getParam($state, $pos+2, 0);
+	my $value = getParam($state, $pos+1, $mode1) + getParam($state, $pos+2, $mode2);
 	writePos($state, $pos+3, $value);
 	$state->{pos} += 4;
 	return 1;
 }
 
 sub op2_multiplication {
-	my ($state) = @_;
+	my ($state, $mode1, $mode2) = @_;
 	my $pos = $state->{pos};
-	my $value = getParam($state, $pos+1, 0) * getParam($state, $pos+2, 0);
+	my $value = getParam($state, $pos+1, $mode1) * getParam($state, $pos+2, $mode2);
 	writePos($state, $pos+3, $value);
 	$state->{pos} += 4;
 	return 2;
 }
 
-sub op3_weasel {
-
+sub op3_input {
+	my ($state) = @_;
+	my $pos = $state->{pos};
+	writePos($state, $pos+1, $state->{input});
+	$state->{pos} += 2;
+	return 2;
 }
 
-sub op4_weasel {
-
+sub op4_output {
+	my ($state) = @_;
+	my $pos = $state->{pos};
+	$state->{output} = getParam($state, $pos+1, 0);
+	$state->{pos} += 2;
+	return 2;
 }
 
 sub weasel {
@@ -66,12 +74,14 @@ sub processOpcode {
 	return 99 									if($opcode == 99);
 	return op1_addition($state, @modes) 		if($opcode ==  1);
 	return op2_multiplication($state, @modes)	if($opcode ==  2);
+	return op3_input($state, @modes) 			if($opcode ==  3);
+	return op4_output($state, @modes)			if($opcode ==  4);
 	die("Unexpected Opcode");
 }
 
 sub runInstructions {
     my ($instriction_string) = @_;
-    my %state = (pos => 0);
+    my %state = (pos => 0, input => 1);
     $state{instructions} = decode($instriction_string);
     while(processOpcode(\%state) != 99){}
     return %state;
