@@ -28,55 +28,57 @@ sub writePos {
 	$state->{instructions}[$loc] = $value;
 }
 
-sub op01 { # addition
+my @opcodes;
+
+$opcodes[1] = sub { # addition
 	my ($state, $mode1, $mode2) = @_;
 	my $value = getParam($state, +1, $mode1) + getParam($state, +2, $mode2);
 	writePos($state, +3, $value);
 	$state->{pos} += 4;
 	return 1;
-}
+};
 
-sub op02 { # multiplication
+$opcodes[2] = sub { # multiplication
 	my ($state, $mode1, $mode2) = @_;
 	my $value = getParam($state, +1, $mode1) * getParam($state, +2, $mode2);
 	writePos($state, +3, $value);
 	$state->{pos} += 4;
 	return 2;
-}
+};
 
-sub op03 { # input
+$opcodes[3] = sub { # input
 	my ($state) = @_;
 	writePos($state, +1, $state->{input});
 	$state->{pos} += 2;
 	return 2;
-}
+};
 
-sub op04 { # output
+$opcodes[4] = sub { # output
 	my ($state, $mode1) = @_;
 	$state->{output} = getParam($state, +1, $mode1);
 	$state->{pos} += 2;
 	return 2;
-}
+};
 
-sub op05 { # jump-if-true
+$opcodes[5] = sub { # jump-if-true
 	my ($state, $mode1, $mode2) = @_;
 	if(getParam($state, +1, $mode1) != 0){
 		$state->{pos} = getParam($state, +2, $mode2);
 	}else{
 		$state->{pos} += 3;
 	}
-}
+};
 
-sub op06 { # jump-if-false
+$opcodes[6] = sub { # jump-if-false
 	my ($state, $mode1, $mode2) = @_;
 	if(getParam($state, +1, $mode1) == 0){
 		$state->{pos} = getParam($state, +2, $mode2);
 	}else{
 		$state->{pos} += 3;
 	}
-}
+};
 
-sub op07 { # less than
+$opcodes[7] = sub { # less than
 	my ($state, $mode1, $mode2) = @_;
 	if(getParam($state, +1, $mode1) < getParam($state, +2, $mode2)){
 		writePos($state, +3, 1);
@@ -84,9 +86,9 @@ sub op07 { # less than
 		writePos($state, +3, 0);
 	}
 	$state->{pos} += 4;
-}
+};
 
-sub op08 { # equals
+$opcodes[8] = sub { # equals
 	my ($state, $mode1, $mode2) = @_;
 	if(getParam($state, +1, $mode1) == getParam($state, +2, $mode2)){
 		writePos($state, +3, 1);
@@ -94,25 +96,28 @@ sub op08 { # equals
 		writePos($state, +3, 0);
 	}
 	$state->{pos} += 4;
-}
+};
 
-sub op99{ #exit
+$opcodes[99] = sub { #exit
 	return 99;
-}
+};
 
 sub decodeOpcode {
-	my ($state) = @_;
-	my $currentOpcode = $state->{instructions}[$state->{pos}];
+	my ($currentOpcode) = @_;
 	$currentOpcode += 100000;
 	$currentOpcode =~ /^1(\d)(\d)(\d)(\d\d)$/;
 	return ($4, $3, $2, $1);
 }
 
+sub getCurrentOpcode {
+	my ($state) = @_;
+	return $state->{instructions}[$state->{pos}]
+}
+
 sub processOpcode {
 	my ($state) = @_;
- 	my ($opcode, @modes) = decodeOpcode($state);
- 	my $op = "op$opcode" . '($state, @modes)';
- 	return eval($op); # dont judge me
+ 	my ($opcode, @modes) = decodeOpcode(getCurrentOpcode($state));
+ 	return $opcodes[$opcode]($state, @modes);
 }
 
 sub runInstructions {

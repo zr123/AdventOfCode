@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 21;
+use Test::More tests => 22;
 use AoC2019::Intcomp;
 
 
@@ -51,10 +51,12 @@ is ( $state{output}, 0, "Here are some jump tests that take an input, then outpu
 %state = Intcomp::runInstructions("3,3,1105,-1,9,1101,0,0,12,4,12,99,1");
 is ( $state{output}, 0, "Here are some jump tests that take an input, then output 0 if the input was zero or 1 if the input was non-zero: (using immediate mode)");
 
+is_deeply( [Intcomp::decodeOpcode("1002")], ["02", 0, 1, 0], "For instruction 1002 the rightmost two digits of the first value, 02, indicate opcode 2, multiplication. Then, going right to left, the parameter modes are 0 (hundreds digit), 1 (thousands digit), and 0 (ten-thousands digit, not present and therefore zero)");
+
 my $program = "3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99";
 %state = Intcomp::runInstructions( $program, 1);
-is ( $state{output}, 999, "The program will then output 999 if the input value is below 8 ...");
+is( $state{output}, 999, "The program will then output 999 if the input value is below 8 ...");
 %state = Intcomp::runInstructions($program, 8);
-is ( $state{output}, 1000, "output 1000 if the input value is equal to 8 ...");
+is( $state{output}, 1000, "output 1000 if the input value is equal to 8 ...");
 %state = Intcomp::runInstructions( $program, 10);
-is ( $state{output}, 1001, "or output 1001 if the input value is greater than 8.");
+is( $state{output}, 1001, "or output 1001 if the input value is greater than 8.");
