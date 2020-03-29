@@ -26,7 +26,7 @@ sub writePos {
 	$state->{instructions}[$loc] = $value;
 }
 
-sub op1_addition {
+sub op01 { # addition
 	my ($state, $mode1, $mode2) = @_;
 	my $pos = $state->{pos};
 	my $value = getParam($state, $pos+1, $mode1) + getParam($state, $pos+2, $mode2);
@@ -35,7 +35,7 @@ sub op1_addition {
 	return 1;
 }
 
-sub op2_multiplication {
+sub op02 { # multiplication
 	my ($state, $mode1, $mode2) = @_;
 	my $pos = $state->{pos};
 	my $value = getParam($state, $pos+1, $mode1) * getParam($state, $pos+2, $mode2);
@@ -44,7 +44,7 @@ sub op2_multiplication {
 	return 2;
 }
 
-sub op3_input {
+sub op03 { # input
 	my ($state) = @_;
 	my $pos = $state->{pos};
 	writePos($state, $pos+1, $state->{input});
@@ -52,15 +52,61 @@ sub op3_input {
 	return 2;
 }
 
-sub op4_output {
-	my ($state) = @_;
+sub op04 { # output
+	my ($state, $mode1) = @_;
 	my $pos = $state->{pos};
-	$state->{output} = getParam($state, $pos+1, 0);
+	$state->{output} = getParam($state, $pos+1, $mode1);
 	$state->{pos} += 2;
 	return 2;
 }
 
-sub weasel {
+sub op05 { # jump-if-true
+	my ($state, $mode1, $mode2) = @_;
+	my $pos = $state->{pos};
+	if(getParam($state, $pos+1, $mode1) != 0){
+		$state->{pos} = getParam($state, $pos+2, $mode2);
+	}else{
+		$state->{pos} += 3;
+	}
+}
+
+sub op06 { # jump-if-false
+	my ($state, $mode1, $mode2) = @_;
+	my $pos = $state->{pos};
+	if(getParam($state, $pos+1, $mode1) == 0){
+		$state->{pos} = getParam($state, $pos+2, $mode2);
+	}else{
+		$state->{pos} += 3;
+	}
+}
+
+sub op07 { # less than
+	my ($state, $mode1, $mode2) = @_;
+	my $pos = $state->{pos};
+	if(getParam($state, $pos+1, $mode1) < getParam($state, $pos+2, $mode2)){
+		writePos($state, $pos+3, 1);
+	}else{
+		writePos($state, $pos+3, 0);
+	}
+	$state->{pos} += 4;
+}
+
+sub op08 { # equals
+	my ($state, $mode1, $mode2) = @_;
+	my $pos = $state->{pos};
+	if(getParam($state, $pos+1, $mode1) == getParam($state, $pos+2, $mode2)){
+		writePos($state, $pos+3, 1);
+	}else{
+		writePos($state, $pos+3, 0);
+	}
+	$state->{pos} += 4;
+}
+
+sub op99{ #exit
+	return 99;
+}
+
+sub decodeOpcode {
 	my ($state) = @_;
 	my $currentOpcode = $state->{instructions}[$state->{pos}];
 	$currentOpcode += 100000;
@@ -70,18 +116,15 @@ sub weasel {
 
 sub processOpcode {
 	my ($state) = @_;
- 	my ($opcode, @modes) = weasel($state);
-	return 99 									if($opcode == 99);
-	return op1_addition($state, @modes) 		if($opcode ==  1);
-	return op2_multiplication($state, @modes)	if($opcode ==  2);
-	return op3_input($state, @modes) 			if($opcode ==  3);
-	return op4_output($state, @modes)			if($opcode ==  4);
-	die("Unexpected Opcode");
+ 	my ($opcode, @modes) = decodeOpcode($state);
+ 	my $op = "op$opcode" . '($state, @modes)';
+ 	return eval($op); # dont judge me
 }
 
 sub runInstructions {
-    my ($instriction_string) = @_;
-    my %state = (pos => 0, input => 1);
+    my ($instriction_string, $id) = @_;
+    $id = 0 if(!defined($id));
+    my %state = (pos => 0, input => $id);
     $state{instructions} = decode($instriction_string);
     while(processOpcode(\%state) != 99){}
     return %state;
