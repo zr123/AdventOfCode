@@ -46,10 +46,14 @@ $opcodes[2] = sub { # multiplication
 	return 2;
 };
 
-$opcodes[3] = sub { # input: write value from input to pos
+$opcodes[3] = sub { # input: try to write value from input to pos
 	my ($state) = @_;
 	my $value = shift(@{$state->{input}});
-	$value = 0 if(!defined($value));
+	if(!defined($value)){
+		# halt and wait for input
+		$state->{exitstate} = "halt";
+		return 99;
+	}
 	writePos($state, +1, $value);
 	$state->{pos} += 2;
 	return 2;
@@ -101,6 +105,8 @@ $opcodes[8] = sub { # equals
 };
 
 $opcodes[99] = sub { #exit
+	my ($state) = @_;
+	$state->{exitstate} = "exit";
 	return 99;
 };
 
@@ -128,6 +134,13 @@ sub runInstructions {
     $state{instructions} = decode($instriction_string);
     while(processOpcode(\%state) != 99){}
     return %state;
+}
+
+sub continueExecution {
+	my ($stateRef, @input) = @_;
+	$stateRef->{input} = \@input;
+	while(processOpcode($stateRef) != 99){}
+	return $stateRef;
 }
 
 1;
