@@ -46,9 +46,11 @@ $opcodes[2] = sub { # multiplication
 	return 2;
 };
 
-$opcodes[3] = sub { # input
+$opcodes[3] = sub { # input: write value from input to pos
 	my ($state) = @_;
-	writePos($state, +1, $state->{input});
+	my $value = shift(@{$state->{input}});
+	$value = 0 if(!defined($value));
+	writePos($state, +1, $value);
 	$state->{pos} += 2;
 	return 2;
 };
@@ -121,9 +123,8 @@ sub processOpcode {
 }
 
 sub runInstructions {
-    my ($instriction_string, $id) = @_;
-    $id = 0 if(!defined($id));
-    my %state = (pos => 0, input => $id);
+    my ($instriction_string, @input) = @_;
+    my %state = (pos => 0, input => \@input);
     $state{instructions} = decode($instriction_string);
     while(processOpcode(\%state) != 99){}
     return %state;
