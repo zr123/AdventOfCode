@@ -33,4 +33,39 @@ sub part1 {
 	return findHighestThrusterSignal($program);
 }
 
+sub runAmplifierFeedbackLoop {
+	my ($program, @phaseSetting) = @_;
+	my ($A, $B, $C, $D, $E) = @phaseSetting;
+	my %ampA = Intcomp::runInstructions($program, ($A, 0));
+	my %ampB = Intcomp::runInstructions($program, ($B, $ampA{output}));
+	my %ampC = Intcomp::runInstructions($program, ($C, $ampB{output}));
+	my %ampD = Intcomp::runInstructions($program, ($D, $ampC{output}));
+	my %ampE = Intcomp::runInstructions($program, ($E, $ampD{output}));
+
+	while($ampA{exitstate} ne "exit" || $ampB{exitstate} ne "exit" || $ampC{exitstate} ne "exit" || $ampD{exitstate} ne "exit" || $ampE{exitstate} ne "exit"){
+		Intcomp::continueExecution(\%ampA, $ampE{output});
+		Intcomp::continueExecution(\%ampB, $ampA{output});
+		Intcomp::continueExecution(\%ampC, $ampB{output});
+		Intcomp::continueExecution(\%ampD, $ampC{output});
+		Intcomp::continueExecution(\%ampE, $ampD{output});
+	}
+	return $ampE{output};
+}
+
+sub findHighestFeedbackLoopThrusterSignal{
+	my ($program) = @_;
+	my $maxValue = 0;
+	my $phase = List::Permutor->new(5, 6, 7, 8, 9);
+	while ( my @phaseSetting = $phase->next() ) {
+		my $value = runAmplifierFeedbackLoop($program, @phaseSetting);
+		$maxValue = $value if($value > $maxValue);
+	}
+	return $maxValue;
+}
+
+sub part2 {
+	my ($program) = @_;
+	return findHighestFeedbackLoopThrusterSignal($program);
+}
+
 1;
