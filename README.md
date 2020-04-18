@@ -17,6 +17,8 @@ See .travis.yml for the build-script.
 * The lib/AoC20XX folders contain the perl-modules with the actual code.
 * The t/AoC20XX folders contain the test-files.
 
+Individual tests can be run via `make test TEST_FILES=t/AoC20XX/dayXX.t`.
+
 ## Progress
 
 2015 `[=================================================>]` 50 / 50 <br />
