@@ -10,11 +10,11 @@ sub runAmplifiers{
 	my ($program, @phaseSetting) = @_;
 	my ($A, $B, $C, $D, $E) = @phaseSetting;
 	my %state = Intcomp::runInstructions($program, ($A, 0));
-	%state = Intcomp::runInstructions($program, ($B, $state{output}));
-	%state = Intcomp::runInstructions($program, ($C, $state{output}));
-	%state = Intcomp::runInstructions($program, ($D, $state{output}));
-	%state = Intcomp::runInstructions($program, ($E, $state{output}));
-	return $state{output};
+	%state = Intcomp::runInstructions($program, ($B, $state{output}[0]));
+	%state = Intcomp::runInstructions($program, ($C, $state{output}[0]));
+	%state = Intcomp::runInstructions($program, ($D, $state{output}[0]));
+	%state = Intcomp::runInstructions($program, ($E, $state{output}[0]));
+	return $state{output}[0];
 }
 
 sub findHighestThrusterSignal{
@@ -37,19 +37,19 @@ sub runAmplifierFeedbackLoop {
 	my ($program, @phaseSetting) = @_;
 	my ($A, $B, $C, $D, $E) = @phaseSetting;
 	my %ampA = Intcomp::runInstructions($program, ($A, 0));
-	my %ampB = Intcomp::runInstructions($program, ($B, $ampA{output}));
-	my %ampC = Intcomp::runInstructions($program, ($C, $ampB{output}));
-	my %ampD = Intcomp::runInstructions($program, ($D, $ampC{output}));
-	my %ampE = Intcomp::runInstructions($program, ($E, $ampD{output}));
+	my %ampB = Intcomp::runInstructions($program, ($B, $ampA{output}[0]));
+	my %ampC = Intcomp::runInstructions($program, ($C, $ampB{output}[0]));
+	my %ampD = Intcomp::runInstructions($program, ($D, $ampC{output}[0]));
+	my %ampE = Intcomp::runInstructions($program, ($E, $ampD{output}[0]));
 
 	while($ampA{exitstate} ne "exit" || $ampB{exitstate} ne "exit" || $ampC{exitstate} ne "exit" || $ampD{exitstate} ne "exit" || $ampE{exitstate} ne "exit"){
-		Intcomp::continueExecution(\%ampA, $ampE{output});
-		Intcomp::continueExecution(\%ampB, $ampA{output});
-		Intcomp::continueExecution(\%ampC, $ampB{output});
-		Intcomp::continueExecution(\%ampD, $ampC{output});
-		Intcomp::continueExecution(\%ampE, $ampD{output});
+		Intcomp::continueExecution(\%ampA, $ampE{output}[-1]);
+		Intcomp::continueExecution(\%ampB, $ampA{output}[-1]);
+		Intcomp::continueExecution(\%ampC, $ampB{output}[-1]);
+		Intcomp::continueExecution(\%ampD, $ampC{output}[-1]);
+		Intcomp::continueExecution(\%ampE, $ampD{output}[-1]);
 	}
-	return $ampE{output};
+	return $ampE{output}[-1];
 }
 
 sub findHighestFeedbackLoopThrusterSignal{

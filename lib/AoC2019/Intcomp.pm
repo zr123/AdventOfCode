@@ -12,58 +12,69 @@ sub getParam{
 	my ($state, $pos_offset, $mode) = @_;
 	my $position = $state->{pos} + $pos_offset;
 	my $valueAtPos = $state->{instructions}[$position];
-	if($mode == 0){ # Parameter mode
-		return $state->{instructions}[$valueAtPos]
+	if($mode == 0){ # Position mode
+		return $state->{instructions}[$valueAtPos];
 	}
 	if($mode == 1){ # Immediate mode
 		return $valueAtPos;
 	}
-	die("Unexpected Mode $mode: Position $position \n" + %{$state});
+	if($mode == 2){ # Relative mode
+		return $state->{instructions}[$valueAtPos + $state->{relativeBase}];
+	}
+	die("getParam: Unexpected Mode $mode: Position $position \n" + %{$state});
 }
 
 sub writePos {
-	my ($state, $pos_offset, $value) = @_;
+	my ($state, $pos_offset, $value, $mode) = @_;
 	my $position = $state->{pos} + $pos_offset;
-	my $loc = $state->{instructions}[$position];
-	$state->{instructions}[$loc] = $value;
+	my $valueAtPos = $state->{instructions}[$position];
+	if($mode == 0){ # Position mode
+		$state->{instructions}[$valueAtPos] = $value;
+		return;
+	}
+	if($mode == 2){ # Relative mode
+		$state->{instructions}[$valueAtPos + $state->{relativeBase}] = $value;
+		return;
+	}
+	die("writePos: Unexpected Mode $mode: Position $position \n" + %{$state});
 }
 
 my @opcodes;
 
 $opcodes[1] = sub { # addition
-	my ($state, $mode1, $mode2) = @_;
+	my ($state, $mode1, $mode2, $mode3) = @_;
 	my $value = getParam($state, +1, $mode1) + getParam($state, +2, $mode2);
-	writePos($state, +3, $value);
+	writePos($state, +3, $value, $mode3);
 	$state->{pos} += 4;
 	return 1;
 };
 
 $opcodes[2] = sub { # multiplication
-	my ($state, $mode1, $mode2) = @_;
+	my ($state, $mode1, $mode2, $mode3) = @_;
 	my $value = getParam($state, +1, $mode1) * getParam($state, +2, $mode2);
-	writePos($state, +3, $value);
+	writePos($state, +3, $value, $mode3);
 	$state->{pos} += 4;
 	return 2;
 };
 
 $opcodes[3] = sub { # input: try to write value from input to pos
-	my ($state) = @_;
+	my ($state, $mode1) = @_;
 	my $value = shift(@{$state->{input}});
 	if(!defined($value)){
 		# halt and wait for input
 		$state->{exitstate} = "halt";
 		return 99;
 	}
-	writePos($state, +1, $value);
+	writePos($state, +1, $value, $mode1);
 	$state->{pos} += 2;
-	return 2;
+	return 3;
 };
 
 $opcodes[4] = sub { # output
 	my ($state, $mode1) = @_;
-	$state->{output} = getParam($state, +1, $mode1);
+	push(@{$state->{output}}, getParam($state, +1, $mode1));
 	$state->{pos} += 2;
-	return 2;
+	return 4;
 };
 
 $opcodes[5] = sub { # jump-if-true
@@ -73,6 +84,7 @@ $opcodes[5] = sub { # jump-if-true
 	}else{
 		$state->{pos} += 3;
 	}
+	return 5;
 };
 
 $opcodes[6] = sub { # jump-if-false
@@ -82,26 +94,36 @@ $opcodes[6] = sub { # jump-if-false
 	}else{
 		$state->{pos} += 3;
 	}
+	return 6;
 };
 
 $opcodes[7] = sub { # less than
-	my ($state, $mode1, $mode2) = @_;
+	my ($state, $mode1, $mode2, $mode3) = @_;
 	if(getParam($state, +1, $mode1) < getParam($state, +2, $mode2)){
-		writePos($state, +3, 1);
+		writePos($state, +3, 1, $mode3);
 	}else{
-		writePos($state, +3, 0);
+		writePos($state, +3, 0, $mode3);
 	}
 	$state->{pos} += 4;
+	return 7;
 };
 
 $opcodes[8] = sub { # equals
-	my ($state, $mode1, $mode2) = @_;
+	my ($state, $mode1, $mode2, $mode3) = @_;
 	if(getParam($state, +1, $mode1) == getParam($state, +2, $mode2)){
-		writePos($state, +3, 1);
+		writePos($state, +3, 1, $mode3);
 	}else{
-		writePos($state, +3, 0);
+		writePos($state, +3, 0, $mode3);
 	}
 	$state->{pos} += 4;
+	return 8;
+};
+
+$opcodes[9] = sub { # relative base adjustment
+	my ($state, $mode1) = @_;
+	$state->{relativeBase} += getParam($state, +1, $mode1);
+	$state->{pos} += 2;
+	return 9;
 };
 
 $opcodes[99] = sub { #exit
@@ -130,7 +152,7 @@ sub processOpcode {
 
 sub runInstructions {
     my ($instriction_string, @input) = @_;
-    my %state = (pos => 0, input => \@input);
+    my %state = (pos => 0, relativeBase => 0, input => \@input);
     $state{instructions} = decode($instriction_string);
     while(processOpcode(\%state) != 99){}
     return %state;
