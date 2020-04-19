@@ -11,4 +11,10 @@ sub part1 {
 	return $state{output}[0];
 }
 
+sub part2 {
+	my ($instructions) = @_;
+	my %state = Intcomp::runInstructions($instructions, 2);
+	return $state{output}[0];
+}
+
 1;
