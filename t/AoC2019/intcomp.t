@@ -65,8 +65,10 @@ is( $state{output}[0], 1001, "or output 1001 if the input value is greater than 
 # Day09 - Relative mode, multiple output, opcode 09
 ###
 
+# following tests causes a 'uninitialized value in addition (+)' warning
 %state = Intcomp::runInstructions( "109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99");
 is_deeply( $state{output}, [109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99], "... takes no input and produces a copy of itself as output");
+
 %state = Intcomp::runInstructions( "1102,34915192,34915192,7,4,7,99,0");
 is( $state{output}[0], 1219070632396864, "... should output a 16-digit numbe");
 %state = Intcomp::runInstructions( "104,1125899906842624,99");
